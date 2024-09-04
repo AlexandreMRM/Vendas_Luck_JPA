@@ -148,7 +148,7 @@ with col2:
                 st.write(f'R${soma_venda_total:,.2f}'.replace('.', ',').replace(',','.',1))
                 with col2_2:
                     st.subheader('Total de Vendas por Canal')
-                    st.dataframe(soma_venda_canal, use_container_width=True)
+                    st.dataframe(soma_venda_canal, use_container_width=True, hide_index=True)
                     
 
         
