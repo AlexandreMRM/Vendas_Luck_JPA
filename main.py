@@ -1,7 +1,7 @@
 import pandas as pd
 import mysql.connector
 import streamlit as st
-import locale
+from babel.numbers import format_currency
 
 def BD_Vendas():
     # Parametros de Login AWS
@@ -41,7 +41,7 @@ def BD_Vendas():
     df['Data_Venda'] = pd.to_datetime(df['Data_Venda'], format='%Y-%m-%d', errors='coerce')
     return df
 
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+#locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 st.set_page_config(layout='wide')
 st.session_state.df = BD_Vendas()
 df = st.session_state.df
@@ -104,22 +104,25 @@ with col2:
                     (resultado_filtrado['Vendedor'] == seleciona_vend)
                     ] 
                 soma_vendas = resultado_filtrado['Valor_Venda'].sum()
+                soma_vendas = format_currency(soma_vendas, 'BRL', locale='pt_BR')
                 st.subheader(f'Total de Vendas: {seleciona_canal} - {seleciona_vend}')
-                st.write(f'R${soma_vendas:,.2f}'.replace('.', ',').replace(',','.',1))
-            with col2_2:
-                resultado_filtrado['Valor_Venda'] = resultado_filtrado['Valor_Venda'].apply(lambda x: locale.format_string('%2f', x, grouping=True))
+                st.write(soma_vendas)
+            with col2_2:#### format currency PAROU AQUI
+                resultado_filtrado['Valor_Venda'] = resultado_filtrado['Valor_Venda'].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
+                #resultado_filtrado['Valor_Venda'] = resultado_filtrado['Valor_Venda'].apply(lambda x: locale.format_string('%2f', x, grouping=True))
                 st.dataframe(resultado_filtrado[['Data_Venda', 'Valor_Venda', 'Vendedor']], use_container_width=True, hide_index=True)
 
         elif seleciona_canal != '--- Todos ---' and seleciona_vend == '--- Todos ---':
             with col2_1:
                 resultado_filtrado = resultado_filtrado[resultado_filtrado['Canal_de_Vendas'] == seleciona_canal]
                 soma_vendas = resultado_filtrado['Valor_Venda'].sum()
+                soma_vendas = format_currency(soma_vendas, 'BRL', locale='pt_BR')
                 st.subheader(f'Total de Venda do Canal {seleciona_canal}')
-                st.write(f'R${soma_vendas:,.2f}')
+                st.write(soma_vendas)
             with col2_2:
                 soma_venda_canal = resultado_filtrado.groupby('Vendedor')['Valor_Venda'].sum().reset_index()
                 soma_venda_canal = soma_venda_canal.sort_values(by='Valor_Venda', ascending=False)
-                soma_venda_canal['Valor_Venda'] = soma_venda_canal['Valor_Venda'].apply(lambda x: locale.format_string('%2f', x, grouping=True))
+                soma_venda_canal['Valor_Venda'] = soma_venda_canal['Valor_Venda'].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
                 st.subheader('Total por Vendedor')
                 st.dataframe(soma_venda_canal, use_container_width=True, hide_index=True)
 
@@ -127,12 +130,13 @@ with col2:
             with col2_1:
                 resultado_filtrado = resultado_filtrado[resultado_filtrado['Vendedor'] == seleciona_vend]
                 soma_vendas = resultado_filtrado['Valor_Venda'].sum()
+                soma_vendas = format_currency(soma_vendas, 'BRL', locale='pt_BR')
                 st.subheader(f'Total de Vendas do Vendedor: {seleciona_vend}')
-                st.write(f'R${soma_vendas:,.2f}')
+                st.write(soma_vendas)
             with col2_2:
                 soma_venda_vend = resultado_filtrado.groupby('Canal_de_Vendas')['Valor_Venda'].sum().reset_index()
                 soma_venda_vend = soma_venda_vend.sort_values(by='Valor_Venda', ascending=False)
-                soma_venda_vend['Valor_Venda'] = soma_venda_vend['Valor_Venda'].apply(lambda x: locale.format_string('%2f', x, grouping=True))
+                soma_venda_vend['Valor_Venda'] = soma_venda_vend['Valor_Venda'].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
                 st.subheader('Valor de Vendas por Canal')
                 st.dataframe(soma_venda_vend, use_container_width=True, hide_index=True)
             
@@ -141,10 +145,11 @@ with col2:
                 soma_venda_canal = resultado_filtrado.groupby('Canal_de_Vendas')['Valor_Venda'].sum().reset_index()
                 soma_venda_canal = soma_venda_canal.sort_values(by='Valor_Venda', ascending=False)
                 soma_venda_total = soma_venda_canal['Valor_Venda'].sum()
-                soma_venda_total = locale.format_string('%.2f', soma_venda_total, grouping=True)
-                soma_venda_canal['Valor_Venda'] = soma_venda_canal['Valor_Venda'].apply(lambda x: locale.format_string('%.2f', x, grouping=True))
+                soma_venda_total = format_currency(soma_venda_total, 'BRL', locale='pt_BR')
+                #soma_venda_total = locale.format_string('%.2f', soma_venda_total, grouping=True)
+                soma_venda_canal['Valor_Venda'] = soma_venda_canal['Valor_Venda'].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
                 st.subheader('Valor Total de Vendas')
-                st.write(f'R${soma_venda_total}')
+                st.write(soma_venda_total)
                 with col2_2:
                     st.subheader('Total de Vendas por Canal')
                     st.dataframe(soma_venda_canal, use_container_width=True, hide_index=True)
